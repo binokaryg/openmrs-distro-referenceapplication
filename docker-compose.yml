@@ -2,16 +2,18 @@ version: "3.7"
 
 services:
   gateway:
-    image: openmrs/openmrs-reference-application-3-gateway:${TAG:-qa}
+    image: openmrs/openmrs-reference-application-3-gateway:${TAG:-3.0.0-beta.21}
     restart: "unless-stopped"
     depends_on:
       - frontend
       - backend
     ports:
-      - "80:80"
+      - "8080:80"
+    networks:
+      - openmrs_network
 
   frontend:
-    image: openmrs/openmrs-reference-application-3-frontend:${TAG:-qa}
+    image: openmrs/openmrs-reference-application-3-frontend:${TAG:-3.0.0-beta.21}
     restart: "unless-stopped"
     environment:
       SPA_PATH: /openmrs/spa
@@ -23,9 +25,11 @@ services:
       timeout: 5s
     depends_on:
       - backend
+    networks:
+      - openmrs_network
 
   backend:
-    image: openmrs/openmrs-reference-application-3-backend:${TAG:-qa}
+    image: openmrs/openmrs-reference-application-3-backend:${TAG:-3.0.0-beta.21}
     restart: "unless-stopped"
     depends_on:
       - db
@@ -42,6 +46,8 @@ services:
       timeout: 5s
     volumes:
       - openmrs-data:/openmrs/data
+    networks:
+      - openmrs_network
 
   # MariaDB
   db:
@@ -60,7 +66,13 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-openmrs}
     volumes:
       - db-data:/var/lib/mysql
+    networks:
+      - openmrs_network
 
 volumes:
   openmrs-data: ~
   db-data: ~
+
+networks:
+  openmrs_network:
+    external: true
